@@ -1,0 +1,58 @@
+{
+  "lastUpdated": "2026-02-19",
+  "version": "1.0.0",
+  "totalEntries": 0,
+  "categories": [
+    {
+      "id": "frontend-dev",
+      "name": "Frontend Development",
+      "keywords": [
+        "React", "Vue", "CSS", "HTML", "JavaScript", "TypeScript",
+        "component", "webpage", "UI", "frontend", "Next.js", "Svelte"
+      ],
+      "file": "frontend-dev.md",
+      "count": 0
+    },
+    {
+      "id": "backend-dev",
+      "name": "Backend Development",
+      "keywords": [
+        "API", "database", "server", "Node.js", "Python", "Express",
+        "REST", "GraphQL", "middleware", "authentication"
+      ],
+      "file": "backend-dev.md",
+      "count": 0
+    },
+    {
+      "id": "writing",
+      "name": "Writing & Content",
+      "keywords": [
+        "article", "copywriting", "translation", "language", "writing",
+        "editing", "proofreading", "content", "documentation", "blog"
+      ],
+      "file": "writing.md",
+      "count": 0
+    },
+    {
+      "id": "design-layout",
+      "name": "Design & Layout",
+      "keywords": [
+        "UI", "UX", "color", "font", "typography", "layout",
+        "design", "visual", "branding", "Figma"
+      ],
+      "file": "design-layout.md",
+      "count": 0
+    },
+    {
+      "id": "workflow",
+      "name": "Workflow & Automation",
+      "keywords": [
+        "efficiency", "management", "tool", "automation", "process",
+        "project", "CI/CD", "DevOps", "pipeline", "script"
+      ],
+      "file": "workflow.md",
+      "count": 0
+    }
+  ],
+  "absorbedSkills": []
+}

@@ -1,0 +1,35 @@
+{
+  "name": "mem-skill",
+  "version": "1.0.0",
+  "description": "Self-evolving memory and knowledge accumulation skill for AI agents. Persistent second brain that auto-retrieves past experiences, captures best practices, and proactively records solutions.",
+  "author": "Oliver Guo",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/oli/mem-skill"
+  },
+  "keywords": [
+    "ai-skill",
+    "knowledge-base",
+    "memory",
+    "agent",
+    "claude",
+    "self-evolving",
+    "qmd",
+    "second-brain"
+  ],
+  "files": [
+    "SKILL.md",
+    "knowledge-base/",
+    "experience/",
+    "references/",
+    "scripts/"
+  ],
+  "bin": {
+    "mem-skill-init": "./scripts/init.sh"
+  },
+  "scripts": {
+    "init": "bash scripts/init.sh",
+    "init:qmd": "bash scripts/init.sh --mem-engine=qmd"
+  }
+}
