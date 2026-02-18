@@ -1,6 +1,6 @@
 {
   "name": "mem-skill",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Self-evolving memory and knowledge accumulation skill for AI agents. Persistent second brain that auto-retrieves past experiences, captures best practices, and proactively records solutions.",
   "author": "Oliver Guo",
   "license": "MIT",
@@ -30,6 +30,8 @@
   },
   "scripts": {
     "init": "bash scripts/init.sh",
-    "init:qmd": "bash scripts/init.sh --mem-engine=qmd"
+    "init:qmd": "bash scripts/init.sh --mem-engine=qmd",
+    "package": "bash scripts/package.sh",
+    "bump": "bash scripts/bump-version.sh"
   }
 }

@@ -1,7 +1,7 @@
 {
   "lastUpdated": "2026-02-19",
   "version": "1.1.0",
-  "totalEntries": 6,
+  "totalEntries": 0,
   "categories": [
     {
       "id": "frontend-dev",
@@ -75,7 +75,7 @@
         "Figma"
       ],
       "file": "design-layout.md",
-      "count": 3
+      "count": 0
     },
     {
       "id": "workflow",
@@ -93,7 +93,7 @@
         "script"
       ],
       "file": "workflow.md",
-      "count": 3
+      "count": 0
     }
   ],
   "absorbedSkills": []

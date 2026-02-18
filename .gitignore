@@ -1,0 +1,40 @@
+# Dependencies
+node_modules/
+.venv/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Build / Package output
+dist/
+*.skill
+knowledge-base.dev-backup/
+experience.dev-backup/
+
+# Runtime config (generated per-workspace, not shipped)
+.mem-skill.config.json
+
+# Environment & secrets
+.env
+.env.*
+.npmrc
+id_rsa
+id_ed25519
+
+# Test artifacts
+examples/**/workspace/
+examples/**/test-report.md
+tests/tmp/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
