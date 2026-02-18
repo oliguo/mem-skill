@@ -19,13 +19,13 @@ Over time, your AI remembers what worked, what failed, and how you prefer things
 ### As an Agent Skill
 
 ```bash
-npx skills add <your-username>/mem-skill
+npx skills add oliguo/mem-skill
 ```
 
 ### From Source
 
 ```bash
-git clone https://github.com/<your-username>/mem-skill.git
+git clone https://github.com/oliguo/mem-skill.git
 cp -r mem-skill ~/.agents/skills/mem-skill
 ```
 
