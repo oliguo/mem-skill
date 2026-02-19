@@ -20,39 +20,47 @@ All processing runs locally. No data leaves the machine.
 
 ## Setup (Performed by `/mem-skill init --mem-engine=qmd`)
 
+During init, the user is prompted for:
+1. **Scope** — `project` (collections scoped to this workspace) or `global` (shared across workspaces)
+2. **Collection names** — defaults are `<project-folder>-knowledge` / `<project-folder>-experience` for project scope, or `mem-knowledge` / `mem-experience` for global scope
+
 ```bash
 # Install QMD globally
 npm install -g @tobilu/qmd
 
-# Create collections for mem-skill directories
-qmd collection add <workspace>/knowledge-base --name mem-knowledge --mask "**/*.md"
-qmd collection add <workspace>/experience --name mem-experience --mask "**/*.md"
+# Create collections with user-chosen names
+qmd collection add <workspace>/knowledge-base --name <knowledge-collection> --mask "**/*.md"
+qmd collection add <workspace>/experience --name <experience-collection> --mask "**/*.md"
 
 # Add context descriptions (improves search relevance)
-qmd context add qmd://mem-knowledge "General knowledge base: reusable workflows, user preferences, best practices, decision logic"
-qmd context add qmd://mem-experience "Skill-specific experience: pitfalls, parameters, error fixes, successful configurations"
+qmd context add qmd://<knowledge-collection> "General knowledge base: reusable workflows, user preferences, best practices, decision logic"
+qmd context add qmd://<experience-collection> "Skill-specific experience: pitfalls, parameters, error fixes, successful configurations"
 
 # Generate initial embeddings
 qmd embed
 ```
 
+Collection names are stored in `.mem-skill.config.json` and read by all subsequent commands.
+
 ## Retrieval Commands
+
+All collection names below (`<knowledge>`, `<experience>`) are read from `.mem-skill.config.json` at runtime.
 
 ### Keyword Search (Fast)
 ```bash
-qmd search "<keywords>" -c mem-knowledge --json -n 10
-qmd search "<skill-id>" -c mem-experience --json -n 5
+qmd search "<keywords>" -c <knowledge> --json -n 10
+qmd search "<skill-id>" -c <experience> --json -n 5
 ```
 
 ### Semantic Search (Better Quality)
 ```bash
-qmd vsearch "<natural language query>" -c mem-knowledge --json -n 10
+qmd vsearch "<natural language query>" -c <knowledge> --json -n 10
 ```
 
 ### Hybrid Search with Re-ranking (Best Quality)
 ```bash
-qmd query "<question or context>" -c mem-knowledge --json -n 10 --min-score 0.3
-qmd query "<skill-id> <problem description>" -c mem-experience --json -n 5 --min-score 0.3
+qmd query "<question or context>" -c <knowledge> --json -n 10 --min-score 0.3
+qmd query "<skill-id> <problem description>" -c <experience> --json -n 5 --min-score 0.3
 ```
 
 ### Retrieve Specific Documents

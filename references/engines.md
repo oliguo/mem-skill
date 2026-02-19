@@ -38,12 +38,15 @@ Every memory engine must support these operations:
   {
     "engine": "qmd",
     "version": "1.0.0",
+    "scope": "project",
     "collections": {
-      "knowledge": "mem-knowledge",
-      "experience": "mem-experience"
+      "knowledge": "<user-chosen-name>",
+      "experience": "<user-chosen-name>"
     }
   }
   ```
+  The `scope` field records whether collections are project-scoped or global.
+  Collection names are chosen by the user during init (not hardcoded).
 - **Detailed reference**: See [qmd-engine.md](qmd-engine.md)
 
 ## Adding a New Engine

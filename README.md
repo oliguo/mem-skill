@@ -95,7 +95,13 @@ Creates `knowledge-base/` and `experience/` directories with starter index files
 /mem-skill init --mem-engine=qmd
 ```
 
-Uses [QMD](https://github.com/tobi/qmd) for hybrid semantic search (BM25 + vector + LLM re-ranking). Requires Node.js >= 22. The init process will prompt you to install QMD if it's not already available.
+Uses [QMD](https://github.com/tobi/qmd) for hybrid semantic search (BM25 + vector + LLM re-ranking). Requires Node.js >= 22. The init process will:
+
+1. Install QMD if not already available
+2. Ask whether collections should be **project-scoped** or **global**
+3. Ask you to **name your collections** (with sensible defaults)
+
+This prevents one project's collections from overwriting another's.
 
 ## Memory Engines
 

@@ -108,29 +108,64 @@ if [ "$ENGINE" = "qmd" ]; then
     fi
   fi
 
+  # Ask collection scope
+  FOLDER_NAME=$(basename "$WORKSPACE")
+  echo ""
+  echo "    Where should QMD collections be stored?"
+  echo "      1) Project  — scoped to this workspace (recommended for multi-project setups)"
+  echo "      2) Global   — shared across all workspaces"
+  echo ""
+  read -p "    Choose [1/2] (default: 1): " SCOPE_CHOICE
+  SCOPE_CHOICE="${SCOPE_CHOICE:-1}"
+
+  if [ "$SCOPE_CHOICE" = "2" ]; then
+    SCOPE="global"
+    DEFAULT_PREFIX="mem"
+  else
+    SCOPE="project"
+    # Sanitize folder name: lowercase, replace spaces/special chars with hyphens
+    DEFAULT_PREFIX=$(echo "$FOLDER_NAME" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9]/-/g' | sed 's/--*/-/g' | sed 's/^-//;s/-$//')
+    DEFAULT_PREFIX="${DEFAULT_PREFIX:-mem}"
+  fi
+
+  # Ask collection names
+  echo ""
+  read -p "    Knowledge collection name (default: ${DEFAULT_PREFIX}-knowledge): " KNOWLEDGE_NAME
+  KNOWLEDGE_NAME="${KNOWLEDGE_NAME:-${DEFAULT_PREFIX}-knowledge}"
+
+  read -p "    Experience collection name (default: ${DEFAULT_PREFIX}-experience): " EXPERIENCE_NAME
+  EXPERIENCE_NAME="${EXPERIENCE_NAME:-${DEFAULT_PREFIX}-experience}"
+
+  echo ""
+  echo "    Scope:                $SCOPE"
+  echo "    Knowledge collection: $KNOWLEDGE_NAME"
+  echo "    Experience collection: $EXPERIENCE_NAME"
+  echo ""
+
   echo "    Creating QMD collections..."
-  qmd collection add "$WORKSPACE/knowledge-base" --name mem-knowledge --mask "**/*.md"
-  qmd collection add "$WORKSPACE/experience" --name mem-experience --mask "**/*.md"
+  qmd collection add "$WORKSPACE/knowledge-base" --name "$KNOWLEDGE_NAME" --mask "**/*.md"
+  qmd collection add "$WORKSPACE/experience" --name "$EXPERIENCE_NAME" --mask "**/*.md"
 
   echo "    Adding QMD context..."
-  qmd context add qmd://mem-knowledge "General knowledge base: reusable workflows, preferences, best practices"
-  qmd context add qmd://mem-experience "Skill-specific experience: pitfalls, parameters, solutions"
+  qmd context add "qmd://$KNOWLEDGE_NAME" "General knowledge base: reusable workflows, preferences, best practices"
+  qmd context add "qmd://$EXPERIENCE_NAME" "Skill-specific experience: pitfalls, parameters, solutions"
 
   echo "    Generating embeddings..."
   qmd embed
 
-  # Write config
-  cat > "$WORKSPACE/.mem-skill.config.json" <<'EOF'
+  # Write config with scope and user-chosen names
+  cat > "$WORKSPACE/.mem-skill.config.json" <<EOF
 {
   "engine": "qmd",
   "version": "1.0.0",
+  "scope": "$SCOPE",
   "collections": {
-    "knowledge": "mem-knowledge",
-    "experience": "mem-experience"
+    "knowledge": "$KNOWLEDGE_NAME",
+    "experience": "$EXPERIENCE_NAME"
   }
 }
 EOF
-  echo "    Created .mem-skill.config.json (engine: qmd)"
+  echo "    Created .mem-skill.config.json (engine: qmd, scope: $SCOPE)"
 
 elif [ "$ENGINE" = "default" ]; then
   # Write config

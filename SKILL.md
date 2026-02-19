@@ -30,26 +30,38 @@ When the user runs `/mem-skill init --mem-engine=qmd`:
 2. Check if QMD is installed: run `which qmd` or `npx @tobilu/qmd status`.
 3. If QMD is **not** installed, prompt:
    > "QMD is not installed. Install it now with `npm install -g @tobilu/qmd`? (QMD requires Node.js >= 22)"
-4. After QMD is confirmed available, set up QMD collections:
+4. **Ask collection scope** — prompt the user:
+   > "Where should QMD collections be stored?  
+   > 1. **Project** — scoped to this workspace (recommended for multi-project setups)  
+   > 2. **Global** — shared across all workspaces"
+   - If **project**: default collection name prefix is the workspace folder name (e.g., `myapp-mem-knowledge`).
+   - If **global**: default collection name prefix is `mem` (e.g., `mem-knowledge`).
+5. **Ask collection names** — prompt the user with suggested defaults:
+   > "What name for the knowledge collection? (default: `<prefix>-knowledge`)"  
+   > "What name for the experience collection? (default: `<prefix>-experience`)"  
+   Accept user input or use the defaults if the user confirms.
+6. After names are confirmed, create the QMD collections:
    ```bash
-   qmd collection add <workspace>/knowledge-base --name mem-knowledge --mask "**/*.md"
-   qmd collection add <workspace>/experience --name mem-experience --mask "**/*.md"
-   qmd context add qmd://mem-knowledge "General knowledge base: reusable workflows, preferences, best practices"
-   qmd context add qmd://mem-experience "Skill-specific experience: pitfalls, parameters, solutions"
+   qmd collection add <workspace>/knowledge-base --name <knowledge-collection-name> --mask "**/*.md"
+   qmd collection add <workspace>/experience --name <experience-collection-name> --mask "**/*.md"
+   qmd context add qmd://<knowledge-collection-name> "General knowledge base: reusable workflows, preferences, best practices"
+   qmd context add qmd://<experience-collection-name> "Skill-specific experience: pitfalls, parameters, solutions"
    qmd embed
    ```
-5. Create a `.mem-skill.config.json` at the workspace root:
+7. Create a `.mem-skill.config.json` at the workspace root:
    ```json
    {
      "engine": "qmd",
      "version": "1.0.0",
+     "scope": "project",
      "collections": {
-       "knowledge": "mem-knowledge",
-       "experience": "mem-experience"
+       "knowledge": "<knowledge-collection-name>",
+       "experience": "<experience-collection-name>"
      }
    }
    ```
-6. Confirm: "mem-skill initialized with QMD memory engine. Collections created and embeddings generated."
+   The `scope` field records the user's choice (`"project"` or `"global"`).
+8. Confirm: "mem-skill initialized with QMD memory engine. Collections created and embeddings generated."
 
 For the **default engine** (no `--mem-engine` flag), create `.mem-skill.config.json` with:
 ```json
@@ -102,7 +114,7 @@ Whenever a non-mem-skill skill is used this turn:
 
 **Engine-specific retrieval:**
 - **Default engine**: Read `experience/_index.json` and match by `skillId`.
-- **QMD engine**: Run `qmd search "<skill-id>" -c mem-experience --json -n 5` for keyword match, or `qmd query "<skill-id> <context>" -c mem-experience --json -n 5` for deeper retrieval.
+- **QMD engine**: Read collection names from `.mem-skill.config.json`, then run `qmd search "<skill-id>" -c <experience-collection> --json -n 5` for keyword match, or `qmd query "<skill-id> <context>" -c <experience-collection> --json -n 5` for deeper retrieval.
 
 ### Step 4: Knowledge Base Read (Only on Topic Switch)
 
@@ -118,9 +130,10 @@ Execute only on the first turn of the conversation or when a topic switch is det
 If no topic switch occurred, reuse `last_matched_categories` without re-reading.
 
 **QMD engine:**
-1. Run `qmd query "<keywords joined by space>" -c mem-knowledge --json -n 10 --min-score 0.3`.
-2. Load top results as context.
-3. Include in response: `"Retrieved knowledge via QMD: <titles>"`
+1. Read collection names from `.mem-skill.config.json`.
+2. Run `qmd query "<keywords joined by space>" -c <knowledge-collection> --json -n 10 --min-score 0.3`.
+3. Load top results as context.
+4. Include in response: `"Retrieved knowledge via QMD: <titles>"`
 
 ### Step 5: Proactive Recording (Most Important)
 
