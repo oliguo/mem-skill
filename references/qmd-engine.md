@@ -20,17 +20,20 @@ All processing runs locally. No data leaves the machine.
 
 ## Setup (Performed by `/mem-skill init --mem-engine=qmd`)
 
-During init, the user is prompted for:
-1. **Scope** — `project` (collections scoped to this workspace) or `global` (shared across workspaces)
-2. **Collection names** — defaults are `<project-folder>-knowledge` / `<project-folder>-experience` for project scope, or `mem-knowledge` / `mem-experience` for global scope
+During init, the user is prompted for (or can pass via flags):
+1. **Scope** — `project` or `global` (flag: `--qmd-scope=project|global`)
+2. **Collection names** — defaults are `<folder>-knowledge` / `<folder>-experience` for project, `mem-knowledge` / `mem-experience` for global (flags: `--qmd-knowledge=<name>`, `--qmd-experience=<name>`)
+3. **File mask** — defaults to `**/*.md` (flag: `--qmd-mask=<pattern>`)
+
+If flags are provided, the corresponding prompts are skipped. If not, the user is asked interactively.
 
 ```bash
 # Install QMD globally
 npm install -g @tobilu/qmd
 
-# Create collections with user-chosen names
-qmd collection add <workspace>/knowledge-base --name <knowledge-collection> --mask "**/*.md"
-qmd collection add <workspace>/experience --name <experience-collection> --mask "**/*.md"
+# Create collections with user-chosen names and mask
+qmd collection add <workspace>/knowledge-base --name <knowledge-collection> --mask "<mask>"
+qmd collection add <workspace>/experience --name <experience-collection> --mask "<mask>"
 
 # Add context descriptions (improves search relevance)
 qmd context add qmd://<knowledge-collection> "General knowledge base: reusable workflows, user preferences, best practices, decision logic"
@@ -40,7 +43,7 @@ qmd context add qmd://<experience-collection> "Skill-specific experience: pitfal
 qmd embed
 ```
 
-Collection names are stored in `.mem-skill.config.json` and read by all subsequent commands.
+Collection names, scope, and mask are stored in `.mem-skill.config.json` and read by all subsequent commands.
 
 ## Retrieval Commands
 

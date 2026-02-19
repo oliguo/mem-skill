@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # mem-skill init script
-# Usage: bash init.sh [--mem-engine=qmd]
+# Usage: bash init.sh [--mem-engine=qmd] [--qmd-scope=project|global]
+#        [--qmd-knowledge=name] [--qmd-experience=name] [--qmd-mask=pattern]
 #
 # Initializes the mem-skill knowledge base and experience directories
 # in the current working directory.
@@ -9,6 +10,10 @@ set -euo pipefail
 
 WORKSPACE="$(pwd)"
 ENGINE="default"
+QMD_SCOPE=""
+QMD_KNOWLEDGE=""
+QMD_EXPERIENCE=""
+QMD_MASK="**/*.md"
 
 # Parse arguments
 for arg in "$@"; do
@@ -16,16 +21,37 @@ for arg in "$@"; do
     --mem-engine=*)
       ENGINE="${arg#*=}"
       ;;
+    --qmd-scope=*)
+      QMD_SCOPE="${arg#*=}"
+      ;;
+    --qmd-knowledge=*)
+      QMD_KNOWLEDGE="${arg#*=}"
+      ;;
+    --qmd-experience=*)
+      QMD_EXPERIENCE="${arg#*=}"
+      ;;
+    --qmd-mask=*)
+      QMD_MASK="${arg#*=}"
+      ;;
     --help|-h)
-      echo "Usage: bash init.sh [--mem-engine=<engine>]"
+      echo "Usage: bash init.sh [--mem-engine=<engine>] [QMD options]"
       echo ""
       echo "Options:"
-      echo "  --mem-engine=<engine>  Memory engine to use (default: default)"
-      echo "                         Available: default, qmd"
+      echo "  --mem-engine=<engine>       Memory engine (default: default)"
+      echo "                              Available: default, qmd"
+      echo ""
+      echo "QMD options (only used with --mem-engine=qmd):"
+      echo "  --qmd-scope=<scope>         Collection scope: project or global"
+      echo "  --qmd-knowledge=<name>      Knowledge collection name"
+      echo "  --qmd-experience=<name>     Experience collection name"
+      echo "  --qmd-mask=<pattern>        File mask for collections (default: **/*.md)"
       echo ""
       echo "Examples:"
       echo "  bash init.sh"
       echo "  bash init.sh --mem-engine=qmd"
+      echo "  bash init.sh --mem-engine=qmd --qmd-scope=project"
+      echo "  bash init.sh --mem-engine=qmd --qmd-scope=global --qmd-knowledge=my-kb --qmd-experience=my-exp"
+      echo "  bash init.sh --mem-engine=qmd --qmd-mask='**/*.md,**/*.txt'"
       exit 0
       ;;
     *)
@@ -108,33 +134,49 @@ if [ "$ENGINE" = "qmd" ]; then
     fi
   fi
 
-  # Ask collection scope
+  # --- Determine scope (from flag or interactive) ---
   FOLDER_NAME=$(basename "$WORKSPACE")
-  echo ""
-  echo "    Where should QMD collections be stored?"
-  echo "      1) Project  — scoped to this workspace (recommended for multi-project setups)"
-  echo "      2) Global   — shared across all workspaces"
-  echo ""
-  read -p "    Choose [1/2] (default: 1): " SCOPE_CHOICE
-  SCOPE_CHOICE="${SCOPE_CHOICE:-1}"
+  if [ -n "$QMD_SCOPE" ]; then
+    SCOPE="$QMD_SCOPE"
+  else
+    echo ""
+    echo "    Where should QMD collections be stored?"
+    echo "      1) Project  — scoped to this workspace (recommended for multi-project setups)"
+    echo "      2) Global   — shared across all workspaces"
+    echo ""
+    read -p "    Choose [1/2] (default: 1): " SCOPE_CHOICE
+    SCOPE_CHOICE="${SCOPE_CHOICE:-1}"
+    if [ "$SCOPE_CHOICE" = "2" ]; then
+      SCOPE="global"
+    else
+      SCOPE="project"
+    fi
+  fi
 
-  if [ "$SCOPE_CHOICE" = "2" ]; then
-    SCOPE="global"
+  # --- Compute default prefix ---
+  if [ "$SCOPE" = "global" ]; then
     DEFAULT_PREFIX="mem"
   else
-    SCOPE="project"
     # Sanitize folder name: lowercase, replace spaces/special chars with hyphens
     DEFAULT_PREFIX=$(echo "$FOLDER_NAME" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9]/-/g' | sed 's/--*/-/g' | sed 's/^-//;s/-$//')
     DEFAULT_PREFIX="${DEFAULT_PREFIX:-mem}"
   fi
 
-  # Ask collection names
-  echo ""
-  read -p "    Knowledge collection name (default: ${DEFAULT_PREFIX}-knowledge): " KNOWLEDGE_NAME
-  KNOWLEDGE_NAME="${KNOWLEDGE_NAME:-${DEFAULT_PREFIX}-knowledge}"
+  # --- Determine collection names (from flags or interactive) ---
+  if [ -n "$QMD_KNOWLEDGE" ]; then
+    KNOWLEDGE_NAME="$QMD_KNOWLEDGE"
+  else
+    echo ""
+    read -p "    Knowledge collection name (default: ${DEFAULT_PREFIX}-knowledge): " KNOWLEDGE_NAME
+    KNOWLEDGE_NAME="${KNOWLEDGE_NAME:-${DEFAULT_PREFIX}-knowledge}"
+  fi
 
-  read -p "    Experience collection name (default: ${DEFAULT_PREFIX}-experience): " EXPERIENCE_NAME
-  EXPERIENCE_NAME="${EXPERIENCE_NAME:-${DEFAULT_PREFIX}-experience}"
+  if [ -n "$QMD_EXPERIENCE" ]; then
+    EXPERIENCE_NAME="$QMD_EXPERIENCE"
+  else
+    read -p "    Experience collection name (default: ${DEFAULT_PREFIX}-experience): " EXPERIENCE_NAME
+    EXPERIENCE_NAME="${EXPERIENCE_NAME:-${DEFAULT_PREFIX}-experience}"
+  fi
 
   echo ""
   echo "    Scope:                $SCOPE"
@@ -143,8 +185,8 @@ if [ "$ENGINE" = "qmd" ]; then
   echo ""
 
   echo "    Creating QMD collections..."
-  qmd collection add "$WORKSPACE/knowledge-base" --name "$KNOWLEDGE_NAME" --mask "**/*.md"
-  qmd collection add "$WORKSPACE/experience" --name "$EXPERIENCE_NAME" --mask "**/*.md"
+  qmd collection add "$WORKSPACE/knowledge-base" --name "$KNOWLEDGE_NAME" --mask "$QMD_MASK"
+  qmd collection add "$WORKSPACE/experience" --name "$EXPERIENCE_NAME" --mask "$QMD_MASK"
 
   echo "    Adding QMD context..."
   qmd context add "qmd://$KNOWLEDGE_NAME" "General knowledge base: reusable workflows, preferences, best practices"
@@ -159,6 +201,7 @@ if [ "$ENGINE" = "qmd" ]; then
   "engine": "qmd",
   "version": "1.0.0",
   "scope": "$SCOPE",
+  "mask": "$QMD_MASK",
   "collections": {
     "knowledge": "$KNOWLEDGE_NAME",
     "experience": "$EXPERIENCE_NAME"

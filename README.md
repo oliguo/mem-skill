@@ -103,6 +103,28 @@ Uses [QMD](https://github.com/tobi/qmd) for hybrid semantic search (BM25 + vecto
 
 This prevents one project's collections from overwriting another's.
 
+#### Skip Prompts with Flags
+
+Pass `--qmd-*` flags to pre-configure everything in one command:
+
+```bash
+# Project-scoped with custom names
+/mem-skill init --mem-engine=qmd --qmd-scope=project --qmd-knowledge=myapp-kb --qmd-experience=myapp-exp
+
+# Global with defaults (no prompts)
+/mem-skill init --mem-engine=qmd --qmd-scope=global --qmd-knowledge=mem-knowledge --qmd-experience=mem-experience
+
+# Custom file mask
+/mem-skill init --mem-engine=qmd --qmd-mask="**/*.md,**/*.txt"
+```
+
+| Flag | Description | Default |
+|------|-------------|---------|
+| `--qmd-scope` | `project` or `global` | _(asks you)_ |
+| `--qmd-knowledge` | Knowledge collection name | _(asks you)_ |
+| `--qmd-experience` | Experience collection name | _(asks you)_ |
+| `--qmd-mask` | File glob for indexing | `**/*.md` |
+
 ## Memory Engines
 
 | Engine    | Search Method              | Dependencies     | Best For                     |

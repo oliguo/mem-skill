@@ -39,6 +39,7 @@ Every memory engine must support these operations:
     "engine": "qmd",
     "version": "1.0.0",
     "scope": "project",
+    "mask": "**/*.md",
     "collections": {
       "knowledge": "<user-chosen-name>",
       "experience": "<user-chosen-name>"
@@ -46,7 +47,8 @@ Every memory engine must support these operations:
   }
   ```
   The `scope` field records whether collections are project-scoped or global.
-  Collection names are chosen by the user during init (not hardcoded).
+  The `mask` field records the file glob pattern used for indexing.
+  Collection names are chosen by the user during init (or via `--qmd-*` flags).
 - **Detailed reference**: See [qmd-engine.md](qmd-engine.md)
 
 ## Adding a New Engine

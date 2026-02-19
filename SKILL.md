@@ -24,44 +24,72 @@ When the user runs `/mem-skill init`, execute the following setup:
 
 ### Engine Selection
 
-When the user runs `/mem-skill init --mem-engine=qmd`:
+When the user runs `/mem-skill init --mem-engine=qmd`, optionally with extra `--qmd-*` flags:
 
-1. Perform all steps above.
+**Supported flags (all optional):**
+| Flag | Values | Default |
+|------|--------|---------|
+| `--qmd-scope=<scope>` | `project`, `global` | _(ask user)_ |
+| `--qmd-knowledge=<name>` | any string | _(ask user)_ |
+| `--qmd-experience=<name>` | any string | _(ask user)_ |
+| `--qmd-mask=<pattern>` | glob pattern | `**/*.md` |
+
+**Examples:**
+```
+/mem-skill init --mem-engine=qmd
+/mem-skill init --mem-engine=qmd --qmd-scope=project
+/mem-skill init --mem-engine=qmd --qmd-scope=global --qmd-knowledge=my-kb --qmd-experience=my-exp
+/mem-skill init --mem-engine=qmd --qmd-mask="**/*.md,**/*.txt"
+```
+
+**Init procedure:**
+
+1. Perform all standard init steps above.
 2. Check if QMD is installed: run `which qmd` or `npx @tobilu/qmd status`.
 3. If QMD is **not** installed, prompt:
    > "QMD is not installed. Install it now with `npm install -g @tobilu/qmd`? (QMD requires Node.js >= 22)"
-4. **Ask collection scope** — prompt the user:
-   > "Where should QMD collections be stored?  
-   > 1. **Project** — scoped to this workspace (recommended for multi-project setups)  
-   > 2. **Global** — shared across all workspaces"
-   - If **project**: default collection name prefix is the workspace folder name (e.g., `myapp-mem-knowledge`).
-   - If **global**: default collection name prefix is `mem` (e.g., `mem-knowledge`).
-5. **Ask collection names** — prompt the user with suggested defaults:
-   > "What name for the knowledge collection? (default: `<prefix>-knowledge`)"  
-   > "What name for the experience collection? (default: `<prefix>-experience`)"  
-   Accept user input or use the defaults if the user confirms.
-6. After names are confirmed, create the QMD collections:
+4. **Determine collection scope:**
+   - If `--qmd-scope` was provided, use that value.
+   - **Otherwise, you MUST ask the user** (do NOT guess or auto-choose):
+     > "Where should QMD collections be stored?
+     > 1. **Project** — scoped to this workspace (recommended for multi-project setups)
+     > 2. **Global** — shared across all workspaces"
+   - If **project**: default collection name prefix is the sanitized workspace folder name (e.g., folder `my-app` → prefix `my-app`).
+   - If **global**: default collection name prefix is `mem`.
+5. **Determine collection names:**
+   - If `--qmd-knowledge` was provided, use that value.
+   - If `--qmd-experience` was provided, use that value.
+   - **For any name NOT provided via flags, you MUST ask the user** (do NOT auto-generate):
+     > "What name for the knowledge collection? (default: `<prefix>-knowledge`)"
+     > "What name for the experience collection? (default: `<prefix>-experience`)"
+   - Accept user input or use the defaults if the user confirms.
+6. **Determine file mask:**
+   - If `--qmd-mask` was provided, use that value.
+   - Otherwise use `**/*.md`.
+7. After all values are confirmed, create the QMD collections:
    ```bash
-   qmd collection add <workspace>/knowledge-base --name <knowledge-collection-name> --mask "**/*.md"
-   qmd collection add <workspace>/experience --name <experience-collection-name> --mask "**/*.md"
-   qmd context add qmd://<knowledge-collection-name> "General knowledge base: reusable workflows, preferences, best practices"
-   qmd context add qmd://<experience-collection-name> "Skill-specific experience: pitfalls, parameters, solutions"
+   qmd collection add <workspace>/knowledge-base --name <knowledge-name> --mask "<mask>"
+   qmd collection add <workspace>/experience --name <experience-name> --mask "<mask>"
+   qmd context add qmd://<knowledge-name> "General knowledge base: reusable workflows, preferences, best practices"
+   qmd context add qmd://<experience-name> "Skill-specific experience: pitfalls, parameters, solutions"
    qmd embed
    ```
-7. Create a `.mem-skill.config.json` at the workspace root:
+8. Create a `.mem-skill.config.json` at the workspace root:
    ```json
    {
      "engine": "qmd",
      "version": "1.0.0",
-     "scope": "project",
+     "scope": "<project|global>",
+     "mask": "<mask>",
      "collections": {
-       "knowledge": "<knowledge-collection-name>",
-       "experience": "<experience-collection-name>"
+       "knowledge": "<knowledge-name>",
+       "experience": "<experience-name>"
      }
    }
    ```
-   The `scope` field records the user's choice (`"project"` or `"global"`).
-8. Confirm: "mem-skill initialized with QMD memory engine. Collections created and embeddings generated."
+9. Confirm: "mem-skill initialized with QMD memory engine. Collections created and embeddings generated."
+
+**IMPORTANT:** Never silently create QMD collections without confirming scope and names with the user. If no `--qmd-*` flags were provided, every question above MUST be asked interactively.
 
 For the **default engine** (no `--mem-engine` flag), create `.mem-skill.config.json` with:
 ```json
