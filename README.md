@@ -64,6 +64,52 @@ The next time you (or anyone using this workspace) ask for a landing page, mem-s
 
 ---
 
+## Real-World Example: QMD Engine
+
+Same workflow, but with semantic search powered by QMD. The key differences: you pass flags to skip prompts, and retrieval uses `qmd query` instead of JSON keyword matching.
+
+### 1. Initialize with Flags
+
+No interactive prompts — everything is configured in one command:
+
+```
+You:   /mem-skill init --mem-engine=qmd --qmd-scope=project --qmd-knowledge=demo-kb --qmd-experience=demo-exp
+Agent: ✓ Created knowledge-base/_index.json
+       ✓ Created experience/_index.json
+       ✓ QMD collections: demo-kb, demo-exp
+       ✓ Embeddings generated
+       mem-skill initialized with QMD engine.
+```
+
+### 2. Work Normally — QMD Searches Semantically
+
+```
+You:   Help me write a simple landing page about NVDA stock introduction
+Agent: [runs: qmd query "landing page NVDA stock introduction" -c demo-kb --json -n 10 --min-score 0.3]
+       ...builds the page...
+       Created nvda-landing.html
+```
+
+QMD uses hybrid search (BM25 + vector + re-ranking) to find relevant knowledge — even fuzzy matches that keyword matching would miss.
+
+### 3. mem-skill Learns + QMD Re-indexes
+
+```
+You:   It looks OK
+Agent: I'd like to record this approach to the knowledge base
+       so I can reference it when creating landing pages in the future.
+       Is that okay?
+You:   Yes
+Agent: ✓ Created knowledge-base/web-development.md
+       ✓ Updated knowledge-base/_index.json
+       ✓ qmd update && qmd embed
+       Recorded and re-indexed!
+```
+
+After writing, mem-skill runs `qmd update && qmd embed` so the new entry is immediately searchable via semantic search.
+
+---
+
 ## Installation
 
 ### As an Agent Skill
