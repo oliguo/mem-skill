@@ -135,6 +135,14 @@ cp -r mem-skill ~/.agents/skills/mem-skill
 
 Creates `knowledge-base/` and `experience/` directories with starter index files, using simple JSON keyword matching.
 
+### Record Manually
+
+```bash
+/mem-skill recordnow
+```
+
+Triggers recording for the current conversation — useful when the agent didn't ask automatically after completing tasks. It scans the full conversation, lists all recordable items, and lets you pick which ones to save.
+
 ### Initialize with QMD Engine
 
 ```bash
@@ -301,6 +309,9 @@ When your knowledge base exceeds ~50 entries. mem-skill will proactively suggest
 
 **Does it work with any AI agent?**
 It works with any agent that supports the skill-creator framework (Claude Code, Cursor, Codex, etc.).
+
+**The agent didn't ask to record after completing my tasks. What do I do?**
+Run `/mem-skill recordnow`. It reviews the full conversation, finds completed tasks worth saving, and lets you choose which ones to record.
 
 ## Credits
 

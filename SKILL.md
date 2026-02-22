@@ -101,6 +101,29 @@ For the **default engine** (no `--mem-engine` flag), create `.mem-skill.config.j
 
 For detailed engine-specific behavior, see [references/qmd-engine.md](references/qmd-engine.md) and [references/engines.md](references/engines.md).
 
+## Manual Recording Command
+
+When the user runs `/mem-skill recordnow`, immediately trigger the recording flow for the **current conversation** — even if Step 5 was not triggered automatically.
+
+This is useful when:
+- Multiple tasks were completed in one session and the agent forgot to ask.
+- The user wants to record something that didn't trigger the satisfaction keywords.
+- The user remembers later that a solution was worth saving.
+
+**Procedure:**
+1. Review the full conversation history for completed tasks.
+2. For **each completed task**, summarize it into a one-line essence.
+3. Evaluate: "Will this save time next time?"
+4. Present all recordable items to the user as a numbered list:
+   > "I found these completed tasks worth recording:
+   > 1. [summary of task 1] → knowledge-base
+   > 2. [summary of task 2] → knowledge-base
+   > 3. [summary of skill usage] → experience
+   >
+   > Which ones should I record? (all / 1,2 / none)"
+5. On approval, write each selected item following the same write procedure as Step 5 (including QMD post-write sync if applicable).
+6. If no recordable tasks are found, respond: "I reviewed the conversation but didn't find any completed tasks worth recording. Is there something specific you'd like me to save?"
+
 ## Core Loop (Mandatory Every Turn)
 
 Execute these steps on every conversation turn. Do not display internal cache state to the user.
@@ -188,6 +211,8 @@ qmd embed
 **Forced rule — always ask when experience is missing:**
 If a non-mem-skill skill was used this turn and that skill has no entry in `experience/_index.json`, you **must** ask at task completion:
 > "We used <skill-name> this time, but there's no experience record yet. Can I record this session's approach for future reference?"
+
+**If Step 5 was not triggered** (e.g., multi-task sessions where satisfaction signals were missed), the user can run `/mem-skill recordnow` at any time to manually trigger recording. See "Manual Recording Command" above.
 
 ## Index Formats
 
