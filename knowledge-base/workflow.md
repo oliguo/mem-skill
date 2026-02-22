@@ -27,3 +27,25 @@
 - Always test shell scripts on both macOS and Linux
 - Use `python3 -c` for complex text processing to avoid platform issues
 **Keywords:** macOS, BSD, GNU, sed, head, cross-platform, shell, compatibility
+
+## QMD Init: Always Ask for Scope and Collection Names
+**Date:** 2026-02-23
+**Context:** QMD `collection add` registers collections in a global config. Running `/mem-skill init --mem-engine=qmd` in two different projects with the same default names (`mem-knowledge`, `mem-experience`) silently overwrites the first project's collections.
+**Best Practice:**
+- Never auto-create QMD collections without asking the user for scope (project vs global) and names
+- For project scope, prefix collection names with the sanitized workspace folder name (e.g., `myapp-knowledge`)
+- For global scope, use `mem-` prefix (e.g., `mem-knowledge`)
+- Store scope, mask, and collection names in `.mem-skill.config.json` so all subsequent commands read them
+- SKILL.md instructions must explicitly say "MUST ask" — soft language like "prompt the user" gets ignored by agents
+**Keywords:** QMD, collection, scope, project, global, naming, collision, init
+
+## CLI Flags to Skip Interactive Prompts
+**Date:** 2026-02-23
+**Context:** Agents sometimes skip interactive questions even when SKILL.md says to ask. Power users also want one-liner init commands. Solution: add `--qmd-*` flags that, when provided, skip the corresponding prompt.
+**Best Practice:**
+- Design CLI flags that mirror every interactive question (scope, names, mask)
+- If a flag is provided, use it silently; if not, ask interactively
+- Keep sensible defaults so bare `/mem-skill init --mem-engine=qmd` still works (just asks everything)
+- Document flags in a table in SKILL.md so agents can parse them from the user's command
+- Example: `--qmd-scope=project --qmd-knowledge=demo-kb --qmd-experience=demo-exp`
+**Keywords:** CLI, flags, parameters, interactive, prompts, skip, QMD, automation

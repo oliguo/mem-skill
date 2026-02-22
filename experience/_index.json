@@ -1,12 +1,12 @@
 {
-  "lastUpdated": "2026-02-19",
+  "lastUpdated": "2026-02-23",
   "version": "1.1.0",
   "skills": [
     {
       "skillId": "mem-skill",
       "file": "skill-mem-skill.md",
-      "keywords": ["mem-skill", "auto-skill", "qmd", "validation", "topic-switch", "init", "testing"],
-      "count": 4
+      "keywords": ["mem-skill", "auto-skill", "qmd", "validation", "topic-switch", "init", "testing", "recordnow", "manual-recording"],
+      "count": 5
     }
   ]
 }

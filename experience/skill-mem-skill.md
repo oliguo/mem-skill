@@ -55,3 +55,18 @@
 - examples/08-dynamic-category/test.sh
 - knowledge-base/_index.json (repo version has 5 starter categories)
 **Keywords:** init, categories, blank, seeded, template, workspace
+
+## Adding /mem-skill recordnow for manual recording
+**Date:** 2026-02-23
+**Skill:** mem-skill
+**Context:** In multi-task sessions, Step 5 (proactive recording) often doesn't trigger because the agent loses track of completion signals across many tasks. Users need a way to manually trigger recording after the fact.
+**Solution:**
+- Added `/mem-skill recordnow` command to SKILL.md as a new section before Core Loop
+- Procedure: scan full conversation → summarize completed tasks → present numbered list → user picks which to save
+- Uses the same write flow as Step 5 (including QMD post-write sync)
+- Added cross-reference from Step 5: "user can run `/mem-skill recordnow` at any time"
+- Updated README.md: Quick Start section + FAQ entry
+**Key Files/Paths:**
+- SKILL.md (Manual Recording Command section)
+- README.md (Quick Start + FAQ)
+**Keywords:** recordnow, manual, recording, multi-task, Step-5, trigger, command
