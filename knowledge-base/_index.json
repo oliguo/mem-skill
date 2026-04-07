@@ -1,7 +1,7 @@
 {
   "lastUpdated": "2026-04-08",
   "version": "1.2.0",
-  "totalEntries": 11,
+  "totalEntries": 12,
   "categories": [
     {
       "id": "design-layout",
@@ -37,7 +37,7 @@
         "script"
       ],
       "file": "workflow.md",
-      "count": 8
+      "count": 9
     }
   ],
   "absorbedSkills": []

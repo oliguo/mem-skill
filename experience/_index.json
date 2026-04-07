@@ -5,8 +5,8 @@
     {
       "skillId": "mem-skill",
       "file": "skill-mem-skill.md",
-      "keywords": ["mem-skill", "auto-skill", "qmd", "validation", "topic-switch", "init", "testing", "recordnow", "manual-recording", "LLM-wiki", "upgrade", "backfill", "lint", "ingest"],
-      "count": 7
+      "keywords": ["mem-skill", "auto-skill", "qmd", "validation", "topic-switch", "init", "testing", "recordnow", "manual-recording", "LLM-wiki", "upgrade", "backfill", "lint", "ingest", "release", "zip", "github", "grep-L", "cross-reference"],
+      "count": 8
     }
   ]
 }

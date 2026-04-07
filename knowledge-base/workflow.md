@@ -98,3 +98,21 @@
 - Skip files that already have the field using grep guard: `grep -L '^\*\*Source:\*\*'` to find only missing ones
 - Test on a disposable fixture workspace before running on real data
 **Keywords:** sed, backfill, markdown, macOS, BSD, field-injection, upgrade
+
+---
+
+## Release Zip Script for GitHub Distribution
+
+**Date:** 2026-04-08
+**Source:** conversation
+**Related:** [[workflow#Skill Package Structure and Validation Rules]]
+**Context:** Needed a way to package mem-skill as a downloadable zip for GitHub Releases, so users without `skill-creator` can install manually.
+**Best Practice:**
+- Create a staging directory (`/tmp/mem-skill-vX.Y.Z`), copy only distributable files (SKILL.md, README.md, LICENSE, references/, scripts/, init.sh), then zip from the staging root
+- Write clean/zeroed `_index.json` files (totalEntries:0, empty categories/skills) so users start fresh — never ship personal knowledge-base data
+- Support `--dry-run` flag that lists staged files without creating the zip
+- Auto-read version from `package.json` using a `node -p` one-liner to avoid manual version tracking
+- Print the `gh release create` command at the end for easy copy-paste
+- Output to `dist/` (already in `.gitignore`) to keep repo clean
+- Ensure `mkdir -p` runs before any file writes into the staging tree — ordering matters when python writes JSON to subdirectories
+**Keywords:** release, zip, packaging, distribution, github, staging, dry-run

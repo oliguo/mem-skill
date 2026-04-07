@@ -32,6 +32,7 @@
     "init": "bash scripts/init.sh",
     "init:qmd": "bash scripts/init.sh --mem-engine=qmd",
     "package": "bash scripts/package.sh",
+    "release": "bash scripts/release.sh",
     "bump": "bash scripts/bump-version.sh"
   }
 }

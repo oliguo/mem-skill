@@ -121,3 +121,23 @@
 - SKILL.md (Upgrade Command section)
 - README.md (Upgrading from v1.1.0 section)
 **Keywords:** upgrade, backfill, idempotent, sed, migration, init, version-bump
+
+---
+
+## Running /mem-skill lint and Fixing All 21 Issues
+
+**Date:** 2026-04-08
+**Source:** conversation
+**Related:** [[workflow#sed-based Markdown Field Backfilling]], [[experience/skill-mem-skill#Building the upgrade command]]
+**Situation:** Ran `/mem-skill lint` for the first time on the mem-skill workspace after the v1.2.0 upgrade. Expected few issues since upgrade had already run.
+**What Happened:**
+- Lint found 21 issues: 10 entries missing Source/Related (5 in workflow.md, 5 in skill-mem-skill.md), 3 empty starter categories in _index.json, and 8 missing cross-references
+- Root cause for the 10 missing fields: the upgrade script used `grep -rL '^\*\*Source:\*\*'` which works per-file — if a file has even one entry with Source, the whole file is skipped, leaving older entries in the same file unfixed
+- Fixed all 10 by appending Source/Related to each individual entry
+- Removed 3 empty starter categories (frontend-dev, backend-dev, writing) from _index.json since no .md files existed for them
+- Added 8 bidirectional cross-references between related entries across workflow.md, design-layout.md, and skill-mem-skill.md
+**Lesson:**
+- `grep -L` is file-level, not entry-level — for mixed files, iterate entries individually
+- Lint should always be run after upgrade to catch what automated scripts miss
+- Cross-references are easy to forget when entries are written at different times — lint-driven backfilling is the safety net
+**Keywords:** lint, health-check, cross-reference, grep-L, backfill, empty-categories, bidirectional
