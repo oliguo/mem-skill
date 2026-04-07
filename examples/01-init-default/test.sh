@@ -66,9 +66,18 @@ TODAY=$(date +%Y-%m-%d)
 KB_DATE=$(python3 -c "import json; print(json.load(open('$WORK/knowledge-base/_index.json'))['lastUpdated'])")
 [ "$KB_DATE" = "$TODAY" ] && pass "1.7 lastUpdated is today ($TODAY)" || fail "1.7 lastUpdated=$KB_DATE expected $TODAY"
 
-# 1.8 No extra files
+# 1.8 No extra files (knowledge-base/_index.json, experience/_index.json, .mem-skill.config.json, log.md)
 FILE_COUNT=$(find "$WORK" -type f | wc -l | tr -d ' ')
-[ "$FILE_COUNT" -eq 3 ] && pass "1.8 exactly 3 files created" || fail "1.8 expected 3 files, found $FILE_COUNT"
+[ "$FILE_COUNT" -eq 4 ] && pass "1.8 exactly 4 files created" || fail "1.8 expected 4 files, found $FILE_COUNT"
+
+# 1.9 log.md exists and contains init entry
+if [ -f "$WORK/log.md" ]; then
+  pass "1.9 log.md exists"
+  grep -q "init | mem-skill initialized" "$WORK/log.md" && \
+    pass "1.9b log.md contains init entry" || fail "1.9b log.md missing init entry"
+else
+  fail "1.9 log.md missing"
+fi
 
 echo "  --- $PASS passed, $FAIL failed ---"
 [ "$FAIL" -eq 0 ]

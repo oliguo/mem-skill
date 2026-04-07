@@ -49,3 +49,42 @@
 - Document flags in a table in SKILL.md so agents can parse them from the user's command
 - Example: `--qmd-scope=project --qmd-knowledge=demo-kb --qmd-experience=demo-exp`
 **Keywords:** CLI, flags, parameters, interactive, prompts, skip, QMD, automation
+
+## External Best-Practice Review Pattern (Karpathy LLM Wiki)
+**Date:** 2026-04-08
+**Source:** url:https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f
+**Context:** Reviewed Karpathy's LLM Wiki gist against mem-skill to identify enhancement opportunities. The wiki demonstrated source provenance, cross-referencing, activity logging, compounding updates, and health-check patterns.
+**Related:** [[workflow#CLI Flags to Skip Interactive Prompts]], [[workflow#Upgrade Path for Skill Versions]]
+**Best Practice:**
+- Compare your skill/tool against established best-practice docs to find structural gaps
+- Identify patterns, not just features — Karpathy's wiki showed 7 patterns: provenance, cross-refs, audit logs, compounding, query-filing, lint, ingest
+- Implement all improvements in a single coordinated release to avoid partial states
+- Update README, SKILL.md, init.sh, and tests together for each enhancement
+- Bump version after all enhancements land, not after each one
+**Keywords:** best-practice, review, gap-analysis, Karpathy, LLM-wiki, enhancement, patterns
+
+## Upgrade Path for Skill Versions
+**Date:** 2026-04-08
+**Source:** conversation
+**Context:** Existing v1.1.0 users needed a migration path to get v1.2.0 features (new entry fields, log.md). Designed an `--upgrade` flag in init.sh that backfills new fields into existing entries without losing data.
+**Related:** [[workflow#sed-based Markdown Field Backfilling]], [[workflow#External Best-Practice Review Pattern (Karpathy LLM Wiki)]]
+**Best Practice:**
+- Add an `--upgrade` flag that exits early before normal init flow (prevents accidental re-init)
+- Backfill new fields into existing markdown entries using sed with careful anchor-line matching
+- Always verify idempotency: running upgrade twice should produce 0 changes on the second run
+- Update `.mem-skill.config.json` version as the last step so interrupted upgrades can be re-run
+- Document the upgrade path in README.md with a "What's New" feature table
+**Keywords:** upgrade, migration, backfill, version, idempotent, init, config
+
+## sed-based Markdown Field Backfilling (macOS-compatible)
+**Date:** 2026-04-08
+**Source:** conversation
+**Related:** [[workflow#macOS Compatibility: head and sed Differences]], [[workflow#Upgrade Path for Skill Versions]]
+**Context:** Needed to inject new fields (Source, Related) into existing markdown entries at precise locations — after `**Date:**` and before `**Keywords:**` — without disturbing other content.
+**Best Practice:**
+- Use anchor-line matching with sed: `/^\*\*Date:\*\*/a\` to insert after Date, `/^\*\*Keywords:\*\*/i\` to insert before Keywords
+- macOS requires `sed -i '' 'command'` while Linux uses `sed -i 'command'` — detect with `$OSTYPE == darwin*`
+- Count affected files before and after to report progress (e.g., "Backfilled Source on 2 file(s)")
+- Skip files that already have the field using grep guard: `grep -L '^\*\*Source:\*\*'` to find only missing ones
+- Test on a disposable fixture workspace before running on real data
+**Keywords:** sed, backfill, markdown, macOS, BSD, field-injection, upgrade

@@ -125,6 +125,55 @@ git clone https://github.com/oliguo/mem-skill.git
 cp -r mem-skill ~/.agents/skills/mem-skill
 ```
 
+## Upgrading from v1.1.0
+
+If you already have mem-skill installed and want the new features (activity log, cross-references, source tracking, lint, ingest), you don't need to start over. Just update the skill files and run the upgrade command.
+
+### Step 1: Update the Skill
+
+```bash
+# If installed via skills CLI:
+npx skills add oliguo/mem-skill
+
+# If installed from source:
+cd ~/.agents/skills/mem-skill && git pull
+```
+
+### Step 2: Migrate Your Workspace
+
+```bash
+/mem-skill upgrade
+```
+
+This safely migrates your existing knowledge base:
+- Creates `log.md` (activity timeline) if missing
+- Adds `**Source:** conversation` to existing entries that lack it
+- Adds `**Related:**` placeholder to existing entries for future cross-references
+- Updates your config version to 1.2.0
+
+Your existing entries are **never deleted or rewritten** — only new fields are added.
+
+### Step 3 (Optional): Discover Cross-References
+
+```bash
+/mem-skill lint
+```
+
+After upgrading, run lint to find entries that should be linked together. It detects duplicate entries that can be merged, entries with overlapping keywords, and other health issues.
+
+### What's New in v1.2.0
+
+| Feature | Description |
+|---------|-------------|
+| `**Source:**` field | Tracks where knowledge came from (conversation, file, URL) |
+| `**Related:**` field | Cross-references between entries (Obsidian-compatible wikilinks) |
+| `log.md` | Chronological activity log of all operations |
+| Compounding updates | Merges into existing entries instead of creating duplicates |
+| Filing queries back | Valuable analyses/comparisons offered as knowledge entries |
+| `/mem-skill lint` | Health-check: duplicates, stale entries, contradictions, orphans |
+| `/mem-skill ingest` | Process external files/URLs into knowledge entries |
+| `/mem-skill upgrade` | Safe migration from v1.1.0 |
+
 ## Quick Start
 
 ### Initialize (Default Engine)
@@ -142,6 +191,24 @@ Creates `knowledge-base/` and `experience/` directories with starter index files
 ```
 
 Triggers recording for the current conversation — useful when the agent didn't ask automatically after completing tasks. It scans the full conversation, lists all recordable items, and lets you pick which ones to save.
+
+### Health-Check Your Knowledge Base
+
+```bash
+/mem-skill lint
+```
+
+Runs a comprehensive health-check: detects duplicates, stale entries (> 6 months), contradictions, orphan files, missing cross-references, and index inconsistencies. Presents issues and lets you fix them interactively.
+
+### Ingest External Sources
+
+```bash
+/mem-skill ingest ./docs/api-guide.md
+/mem-skill ingest https://example.com/best-practices
+/mem-skill ingest ./docs/
+```
+
+Processes external files or URLs into knowledge base entries. Extracts actionable insights, matches them to categories, checks for compounding opportunities with existing entries, and lets you approve before writing.
 
 ### Initialize with QMD Engine
 
@@ -216,7 +283,10 @@ More engines can be added — see [references/engines.md](references/engines.md)
 │                                                                  │
 │  Step 5: Proactive Recording                                     │
 │     User says "it is OK" → task completed successfully           │
-│     → Ask permission → record to knowledge-base/landing-pages.md │
+│     → Check existing entries for related content (compounding)   │
+│     → Ask permission → record/update knowledge-base entry        │
+│     → Add cross-references + source provenance                   │
+│     → Log operation to log.md                                    │
 │                                                                  │
 └─────────────────────────────────────────────────────────────────┘
 ```
@@ -230,12 +300,14 @@ mem-skill stores two types of memory:
 ```markdown
 ## Single-File Landing Page Pattern
 **Date:** 2026-02-19
+**Source:** conversation
 **Context:** Building quick stock/product intro landing pages
 **Best Practice:**
 - Use single HTML file with embedded CSS for portability
 - Structure: Hero → Features grid → Stats → CTA → Footer
 - Use responsive CSS Grid (auto-fit, minmax) for feature cards
 - Always include disclaimers for financial/medical content
+**Related:** [[design-layout#Responsive Grid Patterns]]
 **Keywords:** landing-page, HTML, responsive, single-file, stock
 ```
 
@@ -245,12 +317,14 @@ mem-skill stores two types of memory:
 ## QMD embed fails on large directories
 **Date:** 2026-02-19
 **Skill:** qmd-search
+**Source:** conversation
 **Context:** Running qmd embed on 500+ files caused OOM
 **Solution:**
 - Split into smaller collections (< 200 files each)
 - Use `--mask` to exclude non-markdown files
 **Key Files/Paths:**
 - ~/.cache/qmd/models/
+**Related:** [[workflow#QMD Collection Setup]]
 **Keywords:** qmd, embed, OOM, large, collection
 ```
 
@@ -267,6 +341,7 @@ mem-skill stores two types of memory:
 │   ├── _index.json             # Skill experience index
 │   ├── skill-<id>.md           # Recorded: pitfalls for a specific skill
 │   └── ...
+├── log.md                      # Chronological activity log
 ├── references/
 │   ├── qmd-engine.md           # QMD engine setup & commands
 │   └── engines.md              # How to add new engines
@@ -313,9 +388,21 @@ It works with any agent that supports the skill-creator framework (Claude Code, 
 **The agent didn't ask to record after completing my tasks. What do I do?**
 Run `/mem-skill recordnow`. It reviews the full conversation, finds completed tasks worth saving, and lets you choose which ones to record.
 
+**How do I keep my knowledge base healthy as it grows?**
+Run `/mem-skill lint` periodically. It detects duplicates, stale entries, contradictions, and missing cross-references. Think of it as a code linter for your knowledge base.
+
+**Can I import knowledge from external documents?**
+Yes — run `/mem-skill ingest <file-or-url>`. It extracts actionable insights, matches them to your categories, and lets you approve before writing. Source provenance is tracked automatically.
+
+**What are cross-references?**
+Entries can link to related entries using `**Related:** [[category#entry-title]]` syntax (Obsidian-compatible). When you record a new entry, mem-skill searches for related existing entries and adds bidirectional links — so your knowledge compounds instead of just accumulating.
+
+**What is the log.md file?**
+A chronological record of all mem-skill operations (reads, writes, lints, ingests). Helps you see how your knowledge base evolves over time. Parseable with `grep "^## \[" log.md | tail -5`.
+
 ## Credits
 
-Inspired by [Auto-Skill](https://github.com/Toolsai/auto-skill) (Toolsai) and powered by [QMD](https://github.com/tobi/qmd) (Tobi Lütke).
+Inspired by [Auto-Skill](https://github.com/Toolsai/auto-skill) (Toolsai), [LLM Wiki](https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f) (Andrej Karpathy), and powered by [QMD](https://github.com/tobi/qmd) (Tobi Lütke).
 
 ## License
 

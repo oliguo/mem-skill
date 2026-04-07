@@ -70,3 +70,44 @@
 - SKILL.md (Manual Recording Command section)
 - README.md (Quick Start + FAQ)
 **Keywords:** recordnow, manual, recording, multi-task, Step-5, trigger, command
+
+## Implementing 7 LLM Wiki enhancements end-to-end
+**Date:** 2026-04-08
+**Skill:** mem-skill
+**Source:** conversation
+**Related:** [[workflow#External Best-Practice Review Pattern (Karpathy LLM Wiki)]]
+**Context:** After reviewing Karpathy's LLM Wiki, implemented all 7 identified enhancements in a single coordinated release: source provenance, cross-references, log.md, compounding updates, filing queries, lint command, and ingest command.
+**Solution:**
+- Added Source and Related fields to entry formats in SKILL.md with clear field-value docs
+- Created log.md during init; appended log entries on read/write/lint/ingest/recordnow
+- Modified Step 5 to search existing entries before writing (compounding updates instead of duplicates)
+- Added `/mem-skill lint` with 6 health checks: duplicates, stale, contradictions, orphans, missing cross-refs, index consistency
+- Added `/mem-skill ingest` for processing external files/URLs/directories into knowledge entries
+- Updated init.sh to create log.md, updated integration test 01-init-default (file count 3→4)
+- All changes coordinated: SKILL.md, README.md, init.sh, tests — bumped to v1.2.0
+**Key Files/Paths:**
+- SKILL.md (Entry Formats, Log Format, Core Loop steps, lint/ingest commands)
+- README.md (What Gets Recorded, FAQ, Credits)
+- scripts/init.sh (log.md creation)
+- examples/01-init-default/test.sh (updated assertions)
+**Keywords:** LLM-wiki, enhancement, source-provenance, cross-reference, log, compounding, lint, ingest
+
+## Building the upgrade command with idempotent backfill
+**Date:** 2026-04-08
+**Skill:** mem-skill
+**Source:** conversation
+**Related:** [[workflow#Upgrade Path for Skill Versions]], [[workflow#sed-based Markdown Field Backfilling]]
+**Context:** Existing v1.1.0 users needed to get v1.2.0 features (Source/Related fields, log.md) without re-initializing. Built `--upgrade` flag in init.sh with sed-based backfilling.
+**Solution:**
+- Added `--upgrade` flag that exits early before normal init flow (avoids accidental re-init)
+- Reads current version and engine from `.mem-skill.config.json`
+- Creates log.md if missing, backfills `**Source:** conversation` after `**Date:**` lines, backfills `**Related:**` before `**Keywords:**` lines
+- Updates config version as last step so interrupted upgrades can be re-run
+- Re-indexes QMD collections if engine is qmd
+- Gotcha: first implementation accidentally added duplicate upgrade blocks (one at top, one at bottom of init.sh) — must keep only the early-exit version
+- Tested end-to-end with /tmp fixture, verified idempotency (second run: 0 backfills)
+**Key Files/Paths:**
+- scripts/init.sh (--upgrade flag, early exit, sed backfill logic)
+- SKILL.md (Upgrade Command section)
+- README.md (Upgrading from v1.1.0 section)
+**Keywords:** upgrade, backfill, idempotent, sed, migration, init, version-bump

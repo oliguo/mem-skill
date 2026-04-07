@@ -1,7 +1,7 @@
 {
-  "lastUpdated": "2026-02-23",
-  "version": "1.1.0",
-  "totalEntries": 8,
+  "lastUpdated": "2026-04-08",
+  "version": "1.2.0",
+  "totalEntries": 11,
   "categories": [
     {
       "id": "frontend-dev",
@@ -93,7 +93,7 @@
         "script"
       ],
       "file": "workflow.md",
-      "count": 5
+      "count": 8
     }
   ],
   "absorbedSkills": []

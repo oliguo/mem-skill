@@ -1,12 +1,12 @@
 {
-  "lastUpdated": "2026-02-23",
-  "version": "1.1.0",
+  "lastUpdated": "2026-04-08",
+  "version": "1.2.0",
   "skills": [
     {
       "skillId": "mem-skill",
       "file": "skill-mem-skill.md",
-      "keywords": ["mem-skill", "auto-skill", "qmd", "validation", "topic-switch", "init", "testing", "recordnow", "manual-recording"],
-      "count": 5
+      "keywords": ["mem-skill", "auto-skill", "qmd", "validation", "topic-switch", "init", "testing", "recordnow", "manual-recording", "LLM-wiki", "upgrade", "backfill", "lint", "ingest"],
+      "count": 7
     }
   ]
 }

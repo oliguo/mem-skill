@@ -2,6 +2,7 @@
 # mem-skill init script
 # Usage: bash init.sh [--mem-engine=qmd] [--qmd-scope=project|global]
 #        [--qmd-knowledge=name] [--qmd-experience=name] [--qmd-mask=pattern]
+#        [--upgrade]
 #
 # Initializes the mem-skill knowledge base and experience directories
 # in the current working directory.
@@ -14,6 +15,7 @@ QMD_SCOPE=""
 QMD_KNOWLEDGE=""
 QMD_EXPERIENCE=""
 QMD_MASK="**/*.md"
+UPGRADE=false
 
 # Parse arguments
 for arg in "$@"; do
@@ -33,12 +35,16 @@ for arg in "$@"; do
     --qmd-mask=*)
       QMD_MASK="${arg#*=}"
       ;;
+    --upgrade)
+      UPGRADE=true
+      ;;
     --help|-h)
-      echo "Usage: bash init.sh [--mem-engine=<engine>] [QMD options]"
+      echo "Usage: bash init.sh [--mem-engine=<engine>] [--upgrade] [QMD options]"
       echo ""
       echo "Options:"
       echo "  --mem-engine=<engine>       Memory engine (default: default)"
       echo "                              Available: default, qmd"
+      echo "  --upgrade                   Migrate existing workspace to latest version"
       echo ""
       echo "QMD options (only used with --mem-engine=qmd):"
       echo "  --qmd-scope=<scope>         Collection scope: project or global"
@@ -52,6 +58,7 @@ for arg in "$@"; do
       echo "  bash init.sh --mem-engine=qmd --qmd-scope=project"
       echo "  bash init.sh --mem-engine=qmd --qmd-scope=global --qmd-knowledge=my-kb --qmd-experience=my-exp"
       echo "  bash init.sh --mem-engine=qmd --qmd-mask='**/*.md,**/*.txt'"
+      echo "  bash init.sh --upgrade"
       exit 0
       ;;
     *)
@@ -61,6 +68,103 @@ for arg in "$@"; do
       ;;
   esac
 done
+
+# --- Upgrade mode (runs independently, then exits) ---
+if [ "$UPGRADE" = true ]; then
+  echo "==> Running mem-skill upgrade in: $WORKSPACE"
+  TODAY=$(date +%Y-%m-%d)
+
+  # Check prerequisites
+  if [ ! -f "$WORKSPACE/knowledge-base/_index.json" ] || [ ! -f "$WORKSPACE/experience/_index.json" ]; then
+    echo "    ERROR: No existing workspace found. Run '/mem-skill init' first."
+    exit 1
+  fi
+
+  # Read current version and engine from config
+  OLD_VERSION="unknown"
+  CURRENT_ENGINE="default"
+  if [ -f "$WORKSPACE/.mem-skill.config.json" ]; then
+    OLD_VERSION=$(python3 -c "import json; print(json.load(open('$WORKSPACE/.mem-skill.config.json')).get('version', 'unknown'))" 2>/dev/null || echo "unknown")
+    CURRENT_ENGINE=$(python3 -c "import json; print(json.load(open('$WORKSPACE/.mem-skill.config.json')).get('engine', 'default'))" 2>/dev/null || echo "default")
+  fi
+  echo "    Current version: $OLD_VERSION"
+  echo "    Engine: $CURRENT_ENGINE"
+
+  # 1. Create log.md if missing
+  if [ ! -f "$WORKSPACE/log.md" ]; then
+    cat > "$WORKSPACE/log.md" <<EOF
+# mem-skill Activity Log
+
+Chronological record of all mem-skill operations. Each entry is parseable with \`grep "^## \\[" log.md\`.
+
+## [$TODAY] upgrade | Migrated from v$OLD_VERSION to v1.2.0
+EOF
+    echo "    ✓ Created log.md"
+  else
+    echo "## [$TODAY] upgrade | Migrated from v$OLD_VERSION to v1.2.0" >> "$WORKSPACE/log.md"
+    echo "    ✓ log.md already exists, appended upgrade entry"
+  fi
+
+  # 2. Backfill Source field on entries missing it
+  SOURCE_COUNT=0
+  for md_file in "$WORKSPACE"/knowledge-base/*.md "$WORKSPACE"/experience/*.md; do
+    [ -f "$md_file" ] || continue
+    [[ "$(basename "$md_file")" == _* ]] && continue
+    if grep -q '\*\*Date:\*\*' "$md_file" && ! grep -q '\*\*Source:\*\*' "$md_file"; then
+      if [[ "$OSTYPE" == "darwin"* ]]; then
+        sed -i '' 's/^\(\*\*Date:\*\*.*\)$/\1\
+**Source:** conversation/' "$md_file"
+      else
+        sed -i 's/^\(\*\*Date:\*\*.*\)$/\1\n**Source:** conversation/' "$md_file"
+      fi
+      SOURCE_COUNT=$((SOURCE_COUNT + 1))
+    fi
+  done
+  echo "    ✓ Backfilled Source on $SOURCE_COUNT file(s)"
+
+  # 3. Backfill Related field on entries missing it
+  RELATED_COUNT=0
+  for md_file in "$WORKSPACE"/knowledge-base/*.md "$WORKSPACE"/experience/*.md; do
+    [ -f "$md_file" ] || continue
+    [[ "$(basename "$md_file")" == _* ]] && continue
+    if grep -q '\*\*Keywords:\*\*' "$md_file" && ! grep -q '\*\*Related:\*\*' "$md_file"; then
+      if [[ "$OSTYPE" == "darwin"* ]]; then
+        sed -i '' 's/^\(\*\*Keywords:\*\*\)/**Related:**\
+\1/' "$md_file"
+      else
+        sed -i 's/^\(\*\*Keywords:\*\*\)/**Related:**\n\1/' "$md_file"
+      fi
+      RELATED_COUNT=$((RELATED_COUNT + 1))
+    fi
+  done
+  echo "    ✓ Added Related placeholder to $RELATED_COUNT file(s)"
+
+  # 4. Update config version
+  if [ -f "$WORKSPACE/.mem-skill.config.json" ]; then
+    python3 -c "
+import json
+with open('$WORKSPACE/.mem-skill.config.json', 'r') as f:
+    config = json.load(f)
+config['version'] = '1.2.0'
+with open('$WORKSPACE/.mem-skill.config.json', 'w') as f:
+    json.dump(config, f, indent=2)
+    f.write('\n')
+"
+    echo "    ✓ Updated config version to 1.2.0"
+  fi
+
+  # 5. QMD re-index if applicable
+  if [ "$CURRENT_ENGINE" = "qmd" ] && command -v qmd &> /dev/null; then
+    echo "    Re-indexing QMD..."
+    qmd update && qmd embed
+    echo "    ✓ QMD re-indexed"
+  fi
+
+  echo ""
+  echo "==> Upgrade complete (v$OLD_VERSION → v1.2.0)"
+  echo "    Run '/mem-skill lint' to discover cross-reference opportunities."
+  exit 0
+fi
 
 echo "==> Initializing mem-skill in: $WORKSPACE"
 echo "    Engine: $ENGINE"
@@ -110,6 +214,22 @@ EOF
   echo "    Created experience/_index.json"
 else
   echo "    experience/_index.json already exists, skipping."
+fi
+
+# --- Create log.md ---
+TODAY=$(date +%Y-%m-%d)
+if [ ! -f "$WORKSPACE/log.md" ]; then
+  cat > "$WORKSPACE/log.md" <<EOF
+# mem-skill Activity Log
+
+Chronological record of all mem-skill operations. Each entry is parseable with \`grep "^## \\[" log.md\`.
+
+## [$TODAY] init | mem-skill initialized (engine: $ENGINE)
+EOF
+  echo "    Created log.md"
+else
+  echo "## [$TODAY] init | mem-skill re-initialized (engine: $ENGINE)" >> "$WORKSPACE/log.md"
+  echo "    log.md already exists, appended init entry."
 fi
 
 # --- Engine-specific setup ---
@@ -230,5 +350,6 @@ echo ""
 echo "==> mem-skill initialized successfully!"
 echo "    Knowledge base: $WORKSPACE/knowledge-base/"
 echo "    Experience:      $WORKSPACE/experience/"
+echo "    Activity log:    $WORKSPACE/log.md"
 echo "    Config:          $WORKSPACE/.mem-skill.config.json"
 echo "    Engine:          $ENGINE"
