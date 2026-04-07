@@ -4,62 +4,6 @@
   "totalEntries": 11,
   "categories": [
     {
-      "id": "frontend-dev",
-      "name": "Frontend Development",
-      "keywords": [
-        "React",
-        "Vue",
-        "CSS",
-        "HTML",
-        "JavaScript",
-        "TypeScript",
-        "component",
-        "webpage",
-        "UI",
-        "frontend",
-        "Next.js",
-        "Svelte"
-      ],
-      "file": "frontend-dev.md",
-      "count": 0
-    },
-    {
-      "id": "backend-dev",
-      "name": "Backend Development",
-      "keywords": [
-        "API",
-        "database",
-        "server",
-        "Node.js",
-        "Python",
-        "Express",
-        "REST",
-        "GraphQL",
-        "middleware",
-        "authentication"
-      ],
-      "file": "backend-dev.md",
-      "count": 0
-    },
-    {
-      "id": "writing",
-      "name": "Writing & Content",
-      "keywords": [
-        "article",
-        "copywriting",
-        "translation",
-        "language",
-        "writing",
-        "editing",
-        "proofreading",
-        "content",
-        "documentation",
-        "blog"
-      ],
-      "file": "writing.md",
-      "count": 0
-    },
-    {
       "id": "design-layout",
       "name": "Design & Layout",
       "keywords": [
